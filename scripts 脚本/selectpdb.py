@@ -1,4 +1,23 @@
 #mutation selection
+import argparse
+import os
+import math
+import time
+
+
+def get_parser():
+    parser = argparse.ArgumentParser(description='GRAPE copy files')
+    #parser.parse_args()
+    parser.add_argument("-o", "--outdir", help="output directory")
+    parser.add_argument("-p", "--pdbdir", help="directory of pdb files, ie. /home/user/GRAPE/foldx/")
+    parser.add_argument("-l", '--listfile',help='list file of energies, varied from software')
+    parser.add_argument("-s", "--software", help="software name")
+    parser.add_argument("-c", '--cutoff', help='ddg cutoff')
+    parser.add_argument("-sf", '--filesuffix', help='file suffix, ie. 5XJH_protein_Repair.pdb')
+    #args = parser.parse_args()
+    return parser
+
+
 def foldxfilter(foldxout,ddgcutoff):
     ddg_dict = {}
     foldxoutfile = open(foldxout)
@@ -26,7 +45,7 @@ def foldxfilter(foldxout,ddgcutoff):
 
 
 import os
-def copyfiles(filesuffix,targetdir,selectedlist):
+def copyfiles(filesuffix,pdbdir,targetdir,selectedlist):
     namedlist = []
     for x in selectedlist:
         #print(x)
@@ -35,7 +54,7 @@ def copyfiles(filesuffix,targetdir,selectedlist):
         prefix = mt+number+"_"
         name = prefix+filesuffix
         namedlist.append(name)
-        os.system("cp "+name+" "+targetdir)
+        os.system("cp "+pdbdir+name+" "+targetdir)
 
 def _1_2_3(oneletteraa):
     aadict = {'C':"CYS", 'D':"ASP", 'S':"SER", 'N':"ASN", 'K':"LYS",
@@ -63,13 +82,31 @@ def rosettafilter(rosettaout,ddgcutoff):
             continue
     return rosettaselectlist
 
-foldxout = "/home/jsun/GRAPE/foldx/energies_all.txt"
-rosettaout = "/home/jsun/GRAPE/rosetta/test/ddg_predictions.out"
-foldxddgcutoff = -2
-rosettaddgcutoff = -5
-foldxlist = foldxfilter(foldxout,foldxddgcutoff)
-rosettalist = rosettafilter(rosettaout,rosettaddgcutoff)
-filesuffix="5XJH_protein_Repair.pdb"
-targetdir = "/home/jsun/GRAPE/selectedpdbs/"
-selectedlist = foldxlist+rosettalist
-copyfiles(filesuffix,targetdir,selectedlist)
+if __name__ == '__main__':
+    parser = get_parser()
+    args = parser.parse_args()
+    
+    outdir = args.outdir
+    pdbdir = args.pdbdir
+    listfile = args.listfile
+    software = args.software
+    cutoff = args.cutoff
+    filesuffix = args.filesuffix
+    
+    if software == "foldx":
+        foldxout = listfile
+        foldxddgcutoff = cutoff
+        selectedlist = foldxfilter(foldxout,foldxddgcutoff)
+        targetdir = outdir
+        copyfiles(filesuffix,pdbdir,targetdir,selectedlist)
+        
+    if software == "rosetta":
+        rosettaout = listfile
+        rosettaddgcutoff = cutoff
+        selectedlist = rosettafilter(rosettaout,rosettaddgcutoff)
+        targetdir = outdir
+        copyfiles(filesuffix,pdbdir,targetdir,selectedlist)
+        
+    #if software == "ABACUS":
+    if software not in ["foldx","rosetta","ABACUS"]:
+        print("Unknown software!")
