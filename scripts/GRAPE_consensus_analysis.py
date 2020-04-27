@@ -1,11 +1,3 @@
-#######################################################
-#                      DEPECT                         #
-#                                                     #
-#    DEsign Protein and Enzyme by Computation Tools   #
-#                                                     #
-#                Author: Sun Jinyuan                  #
-#                                                     #
-#######################################################
 
 import argparse
 import os
