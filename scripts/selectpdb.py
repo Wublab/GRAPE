@@ -82,6 +82,8 @@ def rosettafilter(rosettaout,ddgcutoff):
             continue
     return rosettaselectlist
 
+#def abacusfilter(abacusaout,ddgcutoff):
+
 if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
